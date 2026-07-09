@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Node
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Generated outputs
+outputs/
+exports/
+*.pdf
+!docs/Cybergain-Setup-Guide.pdf
+
+# Student-local data
+student-local/
+.vault-local/
+
+# Hermes local overrides
+.hermes-local/

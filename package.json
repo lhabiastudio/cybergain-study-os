@@ -1,0 +1,13 @@
+{
+  "name": "cybergain-study-os",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Windows-first Hermes Study OS for a cybersecurity bootcamp student",
+  "scripts": {
+    "build:pdf": "node scripts/build-pdf.mjs"
+  },
+  "dependencies": {
+    "markdown-it": "^14.3.0",
+    "pdfkit": "^0.19.1"
+  }
+}

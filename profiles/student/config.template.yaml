@@ -1,0 +1,23 @@
+# Plantilla orientativa. Ajusta desde `hermes model` y `hermes config set`.
+model:
+  provider: openai-codex
+  default: gpt-5.4
+  base_url: ''
+
+compression:
+  enabled: true
+  threshold: 0.50
+  target_ratio: 0.20
+
+stt:
+  enabled: true
+  provider: local
+  local:
+    model: base
+
+memory:
+  memory_enabled: true
+  user_profile_enabled: true
+
+# Activa o desactiva herramientas desde `hermes tools`.
+# Mantén la configuración pequeña. Este sistema no necesita todo el stack maestro.
