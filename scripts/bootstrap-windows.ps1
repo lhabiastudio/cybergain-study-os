@@ -12,7 +12,7 @@ if ($RepoRoot.Length -gt 120) {
     Write-Warning "La ruta actual es larga ($($RepoRoot.Length) caracteres). En Windows conviene clonar este repo en una ruta corta como $RecommendedRoot para evitar problemas de MAX_PATH."
 }
 
-Write-Host "[1/4] Validando herramientas base..."
+Write-Host "[1/5] Validando herramientas base..."
 $required = @("git")
 foreach ($cmd in $required) {
     if (-not (Get-Command $cmd -ErrorAction SilentlyContinue)) {
@@ -32,13 +32,13 @@ if (Get-Command winget -ErrorAction SilentlyContinue) {
     Write-Host "winget no detectado. Si faltan dependencias en Windows, instálalas manualmente o actualiza App Installer."
 }
 
-Write-Host "[2/4] Creando carpetas locales..."
+Write-Host "[2/5] Creando carpetas locales..."
 New-Item -ItemType Directory -Force -Path $StudentRoot | Out-Null
 New-Item -ItemType Directory -Force -Path $VaultRoot | Out-Null
 New-Item -ItemType Directory -Force -Path $OutputsRoot | Out-Null
 New-Item -ItemType Directory -Force -Path $ExportsRoot | Out-Null
 
-Write-Host "[3/4] Copiando plantilla del vault si falta..."
+Write-Host "[3/5] Copiando plantilla del vault si falta..."
 if (-not (Test-Path (Join-Path $VaultRoot "99_state\STUDY_STATE.md"))) {
     Copy-Item -Path (Join-Path $TemplateRoot "*") -Destination $VaultRoot -Recurse -Force
 }
@@ -50,7 +50,19 @@ New-Item -ItemType Directory -Force -Path $rawPdf | Out-Null
 New-Item -ItemType Directory -Force -Path $rawAudio | Out-Null
 New-Item -ItemType Directory -Force -Path $rawNotes | Out-Null
 
-Write-Host "[4/4] Bootstrap completado."
+Write-Host "[4/5] Instalando las skills de Hermes..."
+$SkillsSource = Join-Path $RepoRoot "hermes-skills"
+$SkillsTarget = Join-Path $env:USERPROFILE ".hermes\skills\cybergain"
+if (Test-Path $SkillsSource) {
+    New-Item -ItemType Directory -Force -Path $SkillsTarget | Out-Null
+    Copy-Item -Path (Join-Path $SkillsSource "*") -Destination $SkillsTarget -Recurse -Force
+    New-Item -ItemType File -Force -Path (Join-Path $StudentRoot ".hermes-installed") | Out-Null
+    Write-Host "Skills de Hermes instaladas en $SkillsTarget"
+} else {
+    Write-Warning "No se encontró la carpeta hermes-skills; se omite la instalación de skills."
+}
+
+Write-Host "[5/5] Bootstrap completado."
 Write-Host "Vault local: $VaultRoot"
 Write-Host "Sugerencia: añade una exclusión de Windows Defender para la carpeta del vault si vas a guardar laboratorios o payloads."
 Write-Host "Siguiente paso: powershell -ExecutionPolicy Bypass -File .\scripts\check-system.ps1"
