@@ -45,6 +45,12 @@ function Get-FieldValue {
     return $null
 }
 
+function Get-MesEs {
+    param([int]$Mes)
+    $meses = @('enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre')
+    return $meses[$Mes - 1]
+}
+
 # --- Derivar stats (best-effort, tolerante) ---
 
 $Modulo = Get-FieldValue $StudyStateRaw "modulo_actual"
@@ -61,6 +67,46 @@ if (-not $Ultima) {
     } else {
         $Ultima = "-"
     }
+}
+
+# --- Nudge de frescura: dias desde la ultima actualizacion ---
+$DiasSinActualizar = $null
+if ($Ultima -and $Ultima -ne "-") {
+    $ParsedUltima = $null
+    if ([DateTime]::TryParseExact($Ultima, 'yyyy-MM-dd', [System.Globalization.CultureInfo]::InvariantCulture, [System.Globalization.DateTimeStyles]::None, [ref]$ParsedUltima)) {
+        $DiasSinActualizar = [int][math]::Floor(((Get-Date).Date - $ParsedUltima.Date).TotalDays)
+    }
+}
+
+$FreshnessHtml = ""
+if ($DiasSinActualizar -and $DiasSinActualizar -gt 7) {
+    if ($DiasSinActualizar -eq 1) { $DiaLabel = "día" } else { $DiaLabel = "días" }
+    $FreshnessHtml = "<br><span class=`"freshness-nudge`">Hace $DiasSinActualizar $DiaLabel sin actualizar. Cierra una sesión para ponerlo al día.</span>"
+}
+
+# --- Callout "Tu proximo paso": objetivo_siguiente de STUDY_STATE, si no, objetivo de SESSION_BRIEF ---
+$ObjetivoSesionBrief = Get-FieldValue $SessionBriefRaw "objetivo"
+$MaterialAnclar      = Get-FieldValue $SessionBriefRaw "material_a_anclar"
+
+$ProximoPasoTexto = Get-FieldValue $StudyStateRaw "objetivo_siguiente"
+if (-not $ProximoPasoTexto) { $ProximoPasoTexto = $ObjetivoSesionBrief }
+
+if ($ProximoPasoTexto) {
+    $ProximoPasoTextoEsc = HtmlEscape $ProximoPasoTexto
+    $NextStepMeta = "Preparado por Hermes para tu próxima sesión."
+    if ($MaterialAnclar) {
+        $NextStepMeta = $NextStepMeta + " Material: " + (HtmlEscape $MaterialAnclar)
+    }
+    $NextStepHtml = @"
+<span class="next-step-label">Tu próximo paso</span>
+<p class="next-step-text">$ProximoPasoTextoEsc</p>
+<p class="next-step-meta muted">$NextStepMeta</p>
+"@
+} else {
+    $NextStepHtml = @'
+<span class="next-step-label">Tu próximo paso</span>
+<p class="next-step-text">Cierra tu primera sesión con <code>close-session.ps1</code> para que Hermes te prepare el siguiente paso.</p>
+'@
 }
 
 $SesionesMatches = [regex]::Matches($LearnLogRaw, '(?m)^-\s+.*\d{4}-\d{2}-\d{2}.*$')
@@ -100,7 +146,7 @@ function Get-MisconceptionBlocks {
 $MisconceptionBlocks = @(Get-MisconceptionBlocks $MisconceptionsRaw)
 $ConceptosAbiertos = @($MisconceptionBlocks | Where-Object { $_.Estado.ToLower() -notmatch 'resuel' }).Count
 
-# --- Estado vacío ---
+# --- Estado vacio ---
 $ModuloEsTBD = -not (Get-FieldValue $StudyStateRaw "modulo_actual")
 $SinSesiones = ($Sesiones -eq 0)
 $EsVacio = $ModuloEsTBD -and $SinSesiones
@@ -159,28 +205,31 @@ function New-DominioViz {
 
     $labelThreshold = 70
 
+    $AriaDominio = HtmlEscape "Dominio: $NDominado temas dominados, $NAMedias a medias, $NPendiente pendientes"
+
     $sb = New-Object System.Text.StringBuilder
     [void]$sb.Append('<div class="dominio-viz">')
-    [void]$sb.Append('<svg class="dominio-bar" viewBox="0 0 1000 28" preserveAspectRatio="none" role="img" aria-label="Distribucion de dominio">')
+    [void]$sb.Append("<p class=`"progreso-summary`">$NDominado de $total temas dominados</p>")
+    [void]$sb.Append("<svg class=`"dominio-bar`" viewBox=`"0 0 1000 28`" preserveAspectRatio=`"none`" role=`"img`" aria-label=`"$AriaDominio`">")
     [void]$sb.Append("<defs><clipPath id=`"dominioClip`"><rect x=`"0`" y=`"0`" width=`"1000`" height=`"28`" rx=`"6`" ry=`"6`"></rect></clipPath></defs>")
     [void]$sb.Append("<g clip-path=`"url(#dominioClip)`">")
 
     if ($wDominado -gt 0) {
-        [void]$sb.Append("<rect data-tip-domain x=`"$x1`" y=`"0`" width=`"$wDominado`" height=`"28`" fill=`"#0F766E`" data-label=`"Dominado`" data-value=`"$NDominado`"></rect>")
+        [void]$sb.Append("<rect data-tip-domain tabindex=`"0`" x=`"$x1`" y=`"0`" width=`"$wDominado`" height=`"28`" style=`"fill:var(--state-mastered)`" data-label=`"Dominado`" data-value=`"$NDominado`"></rect>")
         if ($wDominado -ge $labelThreshold) {
             $cx = [math]::Round($x1 + $wDominado / 2, 1)
             [void]$sb.Append("<text x=`"$cx`" y=`"14`" text-anchor=`"middle`" dominant-baseline=`"central`" class=`"dominio-inline-label`">$NDominado</text>")
         }
     }
     if ($wAMedias -gt 0) {
-        [void]$sb.Append("<rect data-tip-domain x=`"$x2`" y=`"0`" width=`"$wAMedias`" height=`"28`" fill=`"#64748B`" data-label=`"A medias`" data-value=`"$NAMedias`"></rect>")
+        [void]$sb.Append("<rect data-tip-domain tabindex=`"0`" x=`"$x2`" y=`"0`" width=`"$wAMedias`" height=`"28`" style=`"fill:var(--state-progress)`" data-label=`"A medias`" data-value=`"$NAMedias`"></rect>")
         if ($wAMedias -ge $labelThreshold) {
             $cx = [math]::Round($x2 + $wAMedias / 2, 1)
             [void]$sb.Append("<text x=`"$cx`" y=`"14`" text-anchor=`"middle`" dominant-baseline=`"central`" class=`"dominio-inline-label`">$NAMedias</text>")
         }
     }
     if ($wPendiente -gt 0) {
-        [void]$sb.Append("<rect data-tip-domain x=`"$x3`" y=`"0`" width=`"$wPendiente`" height=`"28`" fill=`"#B45309`" data-label=`"Pendiente`" data-value=`"$NPendiente`"></rect>")
+        [void]$sb.Append("<rect data-tip-domain tabindex=`"0`" x=`"$x3`" y=`"0`" width=`"$wPendiente`" height=`"28`" style=`"fill:var(--state-pending)`" data-label=`"Pendiente`" data-value=`"$NPendiente`"></rect>")
         if ($wPendiente -ge $labelThreshold) {
             $cx = [math]::Round($x3 + $wPendiente / 2, 1)
             [void]$sb.Append("<text x=`"$cx`" y=`"14`" text-anchor=`"middle`" dominant-baseline=`"central`" class=`"dominio-inline-label`">$NPendiente</text>")
@@ -190,9 +239,9 @@ function New-DominioViz {
     [void]$sb.Append("</g></svg>")
 
     [void]$sb.Append('<div class="dominio-legend">')
-    [void]$sb.Append("<span class=`"legend-item`"><span class=`"legend-swatch`" style=`"background:#0F766E`"></span>Dominado $NDominado</span>")
-    [void]$sb.Append("<span class=`"legend-item`"><span class=`"legend-swatch`" style=`"background:#64748B`"></span>A medias $NAMedias</span>")
-    [void]$sb.Append("<span class=`"legend-item`"><span class=`"legend-swatch`" style=`"background:#B45309`"></span>Pendiente $NPendiente</span>")
+    [void]$sb.Append("<span class=`"legend-item`"><span class=`"legend-swatch`" style=`"background:var(--state-mastered)`"></span>Dominado $NDominado</span>")
+    [void]$sb.Append("<span class=`"legend-item`"><span class=`"legend-swatch`" style=`"background:var(--state-progress)`"></span>A medias $NAMedias</span>")
+    [void]$sb.Append("<span class=`"legend-item`"><span class=`"legend-swatch`" style=`"background:var(--state-pending)`"></span>Pendiente $NPendiente</span>")
     [void]$sb.Append('</div>')
     [void]$sb.Append('</div>')
 
@@ -238,8 +287,17 @@ function New-ActividadViz {
     $bottomY = $marginT + $plotH
     $areaPath = "$linePath L $($points[-1].X),$bottomY L $($points[0].X),$bottomY Z"
 
+    $primeraFecha = [DateTime]::ParseExact($Entries[0].Fecha, 'yyyy-MM-dd', $null)
+    $ultimaFechaEntry = [DateTime]::ParseExact($Entries[-1].Fecha, 'yyyy-MM-dd', $null)
+    if ($primeraFecha.Month -eq $ultimaFechaEntry.Month -and $primeraFecha.Year -eq $ultimaFechaEntry.Year) {
+        $RangoTexto = "del $($primeraFecha.Day) al $($ultimaFechaEntry.Day) de $(Get-MesEs $ultimaFechaEntry.Month)"
+    } else {
+        $RangoTexto = "del $($primeraFecha.Day) de $(Get-MesEs $primeraFecha.Month) al $($ultimaFechaEntry.Day) de $(Get-MesEs $ultimaFechaEntry.Month)"
+    }
+    $AriaActividad = HtmlEscape "Actividad: $($Entries.Count) sesiones acumuladas $RangoTexto"
+
     $sb = New-Object System.Text.StringBuilder
-    [void]$sb.Append('<svg class="actividad-chart" viewBox="0 0 1000 240" preserveAspectRatio="none" role="img" aria-label="Sesiones acumuladas en el tiempo">')
+    [void]$sb.Append("<svg class=`"actividad-chart`" viewBox=`"0 0 1000 240`" preserveAspectRatio=`"none`" role=`"img`" aria-label=`"$AriaActividad`">")
 
     for ($g = 0; $g -le 3; $g++) {
         $frac = $g / 3
@@ -253,7 +311,8 @@ function New-ActividadViz {
     [void]$sb.Append("<path d=`"$linePath`" class=`"actividad-line`"></path>")
 
     foreach ($p in $points) {
-        [void]$sb.Append("<circle data-tip-activity cx=`"$($p.X)`" cy=`"$($p.Y)`" r=`"5`" class=`"actividad-point`" data-date=`"$($p.Fecha)`" data-index=`"$($p.Value)`" data-topic=`"$($p.Tema)`"></circle>")
+        [void]$sb.Append("<circle cx=`"$($p.X)`" cy=`"$($p.Y)`" r=`"5`" class=`"actividad-point`" aria-hidden=`"true`"></circle>")
+        [void]$sb.Append("<circle data-tip-activity tabindex=`"0`" cx=`"$($p.X)`" cy=`"$($p.Y)`" r=`"12`" class=`"actividad-hit`" data-date=`"$($p.Fecha)`" data-index=`"$($p.Value)`" data-topic=`"$($p.Tema)`"></circle>")
     }
 
     [void]$sb.Append('</svg>')
@@ -440,188 +499,254 @@ $Shell = @'
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cybergain · Tu progreso</title>
 <style>
+  :root{
+    /* superficies */
+    --surface-page:#F6F9F9; --surface-card:#FCFEFE; --surface-soft:#F0FAF9; --border:#E3E9E9; --grid-line:#EEF2F2;
+    /* tinta */
+    --ink:#1F2937; --ink-muted:#5B6572; --ink-strong:#16273A; --on-accent:#FCFEFE;
+    /* acento + estados */
+    --accent:#0F766E; --accent-soft:#F0FDFA;
+    --state-mastered:#0F766E; --state-progress:#64748B; --state-pending:#B45309;
+    --state-mastered-soft:#F0FDFA; --state-pending-soft:#FFFBEB;
+    --badge-open-bg:#FEF3C7; --badge-open-ink:#92400E; --badge-done-bg:#F0FDFA; --badge-done-ink:#0F766E;
+    /* tipografia (escala 1.25) */
+    --text-hero:28px; --text-stat:22px; --text-title:18px; --text-body:14px; --text-small:12px; --text-label:11px;
+    --lh-tight:1.15; --lh-body:1.5;
+    /* espaciado (escala) */
+    --space-1:8px; --space-2:16px; --space-3:24px; --space-4:32px; --space-6:48px; --space-8:64px;
+    /* radios + motion */
+    --radius-sm:8px; --radius-md:12px; --radius-pill:999px;
+    --ease-out:cubic-bezier(0.22,1,0.36,1); --dur-fast:120ms;
+    --maxw:1080px;
+  }
   * { box-sizing: border-box; }
   body {
     margin: 0;
-    background: #F6F9F9;
-    color: #1F2937;
+    background: var(--surface-page);
+    color: var(--ink);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    line-height: 1.5;
-    font-size: 14px;
+    line-height: var(--lh-body);
+    font-size: var(--text-body);
   }
   .mono { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; }
-  .muted { color: #5B6572; }
+  .muted { color: var(--ink-muted); }
 
-  .hero { background: #0F766E; color: #FCFEFE; }
+  .hero { background: var(--accent); color: var(--on-accent); }
   .hero-inner {
-    max-width: 1080px;
+    max-width: var(--maxw);
     margin: 0 auto;
-    padding: 32px 24px;
+    padding: var(--space-4) var(--space-3);
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
     flex-wrap: wrap;
-    gap: 16px;
+    gap: var(--space-2);
   }
-  .hero h1 { margin: 0 0 8px; font-size: 28px; font-weight: 700; line-height: 1.15; }
-  .hero .subtitle { margin: 0; font-size: 14px; color: rgba(252,254,254,0.92); }
-  .hero-date { font-size: 13px; color: rgba(252,254,254,0.92); }
+  .hero h1 { margin: 0 0 var(--space-1); font-size: var(--text-hero); font-weight: 700; line-height: var(--lh-tight); }
+  .hero .subtitle { margin: 0; font-size: var(--text-body); color: rgba(252,254,254,0.92); }
+  .hero-date { font-size: var(--text-small); color: rgba(252,254,254,0.92); }
+  .freshness-nudge { color: rgba(252,254,254,0.78); }
 
-  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px 48px; }
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 var(--space-3) var(--space-6); }
 
   .stats-strip {
     display: flex;
     flex-wrap: wrap;
-    margin: 32px 0;
-    background: #FCFEFE;
-    border: 1px solid #E3E9E9;
-    border-radius: 12px;
+    margin: var(--space-4) 0;
+    background: var(--surface-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
   }
-  .stat-item { flex: 1 1 160px; padding: 16px 24px; }
-  .stat-item + .stat-item { border-left: 1px solid #E3E9E9; }
+  .stat-item { flex: 1 1 160px; padding: var(--space-2) var(--space-3); }
+  .stat-item + .stat-item { border-left: 1px solid var(--border); }
   .stat-label {
-    font-size: 11px;
+    font-size: var(--text-label);
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    color: #5B6572;
-    margin-bottom: 8px;
+    color: var(--ink-muted);
+    margin-bottom: var(--space-1);
   }
-  .stat-value { font-size: 22px; font-weight: 700; color: #16273A; }
+  .stat-value { font-size: var(--text-stat); font-weight: 700; color: var(--ink-strong); }
 
-  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+  .callout-next-step {
+    background: var(--accent-soft);
+    border-radius: var(--radius-md);
+    padding: var(--space-3);
+    margin: var(--space-3) 0;
+  }
+  .next-step-label {
+    display: block;
+    font-size: var(--text-label);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: var(--space-1);
+  }
+  .next-step-text {
+    margin: 0 0 var(--space-1);
+    font-size: var(--text-title);
+    font-weight: 700;
+    color: var(--ink-strong);
+    line-height: var(--lh-tight);
+  }
+  .next-step-meta { margin: 0; font-size: var(--text-small); }
+
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
   .panel-wide { grid-column: 1 / -1; }
   @media (max-width: 720px) {
     .grid { grid-template-columns: 1fr; }
     .hero-inner { align-items: flex-start; }
     .stats-strip { flex-direction: column; }
-    .stat-item + .stat-item { border-left: none; border-top: 1px solid #E3E9E9; }
+    .stat-item + .stat-item { border-left: none; border-top: 1px solid var(--border); }
     .progreso-grid { grid-template-columns: 1fr; }
   }
 
   .panel {
-    background: #FCFEFE;
-    border: 1px solid #E3E9E9;
-    border-radius: 12px;
-    padding: 24px;
+    background: var(--surface-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: var(--space-3);
   }
   .panel-title {
-    margin: 0 0 16px;
-    font-size: 18px;
+    margin: 0 0 var(--space-2);
+    font-size: var(--text-title);
     font-weight: 700;
-    color: #16273A;
-    padding-bottom: 12px;
-    border-bottom: 1px solid #E3E9E9;
+    color: var(--ink-strong);
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--border);
   }
 
   .kv {
     display: flex;
     justify-content: space-between;
-    gap: 8px;
-    padding: 8px 0;
-    border-bottom: 1px solid #E3E9E9;
-    font-size: 14px;
+    gap: var(--space-1);
+    padding: var(--space-1) 0;
+    border-bottom: 1px solid var(--border);
+    font-size: var(--text-body);
   }
   .kv:last-of-type { border-bottom: none; }
-  .kv .k { color: #5B6572; }
-  .kv .v { color: #1F2937; font-weight: 600; text-align: right; }
+  .kv .k { color: var(--ink-muted); }
+  .kv .v { color: var(--ink); font-weight: 600; text-align: right; }
 
   .section-heading {
-    font-size: 12px;
+    font-size: var(--text-label);
     text-transform: uppercase;
     letter-spacing: 0.06em;
     font-weight: 700;
-    color: #5B6572;
-    margin: 16px 0 8px;
+    color: var(--ink-muted);
+    margin: var(--space-2) 0 var(--space-1);
   }
-  .section-heading.dominado { color: #0F766E; }
-  .section-heading.pendiente { color: #B45309; }
+  .section-heading.dominado { color: var(--state-mastered); }
+  .section-heading.pendiente { color: var(--state-pending); }
 
-  .list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
-  .list li { font-size: 14px; padding: 8px 8px; background: #F6F9F9; border-radius: 8px; }
-  .list.dominado li { background: #F0FDFA; }
-  .list.pendiente li { background: #FFFBEB; }
+  .progreso-summary { margin: 0 0 var(--space-2); font-size: var(--text-body); color: var(--ink); font-weight: 600; }
+
+  .list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-1); }
+  .list li { font-size: var(--text-body); padding: var(--space-1) var(--space-1); background: var(--surface-page); border-radius: var(--radius-sm); }
+  .list.dominado li { background: var(--state-mastered-soft); }
+  .list.pendiente li { background: var(--state-pending-soft); }
 
   .timeline { display: flex; flex-direction: column; }
   .timeline-row {
     display: grid;
     grid-template-columns: 110px 1fr;
-    gap: 16px;
-    padding: 16px 0;
-    border-bottom: 1px solid #E3E9E9;
+    gap: var(--space-2);
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--border);
+    transition: background var(--dur-fast) var(--ease-out);
   }
   .timeline-row:last-child { border-bottom: none; }
-  .timeline-row:hover { background: #F0FAF9; transition: background 120ms ease-out; }
-  .timeline-date { color: #0F766E; font-size: 13px; font-weight: 600; }
-  .timeline-text { font-size: 14px; color: #1F2937; }
+  .timeline-row:hover { background: var(--surface-soft); }
+  .timeline-date { color: var(--accent); font-size: var(--text-small); font-weight: 600; }
+  .timeline-text { font-size: var(--text-body); color: var(--ink); }
 
   .misc-rows { display: flex; flex-direction: column; }
-  .misc-row-item { padding: 16px 0; border-top: 1px solid #E3E9E9; }
+  .misc-row-item { padding: var(--space-2) 0; border-top: 1px solid var(--border); transition: background var(--dur-fast) var(--ease-out); }
   .misc-row-item:first-child { border-top: none; padding-top: 0; }
-  .misc-row-item:hover { background: #F0FAF9; transition: background 120ms ease-out; }
-  .misc-row-head { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
-  .misc-concept { font-weight: 700; color: #16273A; font-size: 14px; }
-  .misc-detail { font-size: 14px; margin-top: 8px; }
+  .misc-row-item:hover { background: var(--surface-soft); }
+  .misc-row-head { display: flex; justify-content: space-between; align-items: center; gap: var(--space-2); }
+  .misc-concept { font-weight: 700; color: var(--ink-strong); font-size: var(--text-body); }
+  .misc-detail { font-size: var(--text-body); margin-top: var(--space-1); }
   .misc-label {
     display: block;
-    color: #5B6572;
-    font-size: 11px;
+    color: var(--ink-muted);
+    font-size: var(--text-label);
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    margin-bottom: 8px;
+    margin-bottom: var(--space-1);
   }
   .badge {
-    font-size: 11px;
+    font-size: var(--text-label);
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    padding: 8px 8px;
-    border-radius: 999px;
+    padding: var(--space-1) var(--space-1);
+    border-radius: var(--radius-pill);
     font-weight: 600;
     flex-shrink: 0;
     line-height: 1;
   }
-  .badge-open { background: #FEF3C7; color: #92400E; }
-  .badge-resolved { background: #F0FDFA; color: #0F766E; }
+  .badge-open { background: var(--badge-open-bg); color: var(--badge-open-ink); }
+  .badge-resolved { background: var(--badge-done-bg); color: var(--badge-done-ink); }
 
-  .progreso-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .progreso-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); }
   .progreso-col { display: flex; flex-direction: column; }
 
-  .dominio-viz { display: flex; flex-direction: column; gap: 16px; }
+  .dominio-viz { display: flex; flex-direction: column; gap: var(--space-2); }
   .dominio-bar { width: 100%; height: 28px; display: block; }
-  .dominio-inline-label { fill: #FCFEFE; font-size: 13px; font-weight: 700; }
-  .dominio-legend { display: flex; flex-wrap: wrap; gap: 16px; margin: 0; padding: 0; }
-  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #1F2937; }
-  .legend-swatch { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+  .dominio-inline-label { fill: var(--on-accent); font-size: var(--text-small); font-weight: 700; }
+  .dominio-legend { display: flex; flex-wrap: wrap; gap: var(--space-2); margin: 0; padding: 0; }
+  .legend-item { display: flex; align-items: center; gap: var(--space-1); font-size: var(--text-body); color: var(--ink); }
+  .legend-swatch { width: 12px; height: 12px; border-radius: var(--radius-sm); display: inline-block; }
 
   .actividad-chart { width: 100%; height: 240px; display: block; }
-  .actividad-grid { stroke: #EEF2F2; stroke-width: 1; }
-  .actividad-axis-label { font-size: 11px; fill: #5B6572; }
+  .actividad-grid { stroke: var(--grid-line); stroke-width: 1; }
+  .actividad-axis-label { font-size: var(--text-label); fill: var(--ink-muted); }
   .actividad-area { fill: rgba(15, 118, 110, 0.10); stroke: none; }
-  .actividad-line { fill: none; stroke: #0F766E; stroke-width: 2; }
-  .actividad-point { fill: #0F766E; stroke: #FCFEFE; stroke-width: 2; cursor: pointer; }
+  .actividad-line { fill: none; stroke: var(--accent); stroke-width: 2; }
+  .actividad-point { fill: var(--accent); stroke: var(--on-accent); stroke-width: 2; }
+  .actividad-hit { fill: transparent; cursor: pointer; outline: none; }
+
+  .dominio-bar rect:focus-visible,
+  .actividad-hit:focus-visible {
+    outline: 2px solid var(--ink-strong);
+    outline-offset: 2px;
+  }
 
   #cg-tooltip {
     position: fixed;
     display: none;
-    background: #16273A;
-    color: #FCFEFE;
-    font-size: 12px;
-    padding: 8px 8px;
-    border-radius: 8px;
+    background: var(--ink-strong);
+    color: var(--on-accent);
+    font-size: var(--text-small);
+    padding: var(--space-1) var(--space-1);
+    border-radius: var(--radius-sm);
     pointer-events: none;
     z-index: 999;
     white-space: nowrap;
   }
 
-  .empty-state { text-align: center; padding: 64px 24px; color: #5B6572; }
-  .empty-state h2 { color: #16273A; font-size: 22px; margin-bottom: 8px; }
+  .empty-state { text-align: center; padding: var(--space-8) var(--space-3); color: var(--ink-muted); }
+  .empty-state h2 { color: var(--ink-strong); font-size: var(--text-stat); margin-bottom: var(--space-1); }
   .empty-state code {
     font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
-    background: #E3E9E9;
-    padding: 2px 8px;
-    border-radius: 4px;
+    background: var(--border);
+    padding: 2px var(--space-1);
+    border-radius: var(--radius-sm);
   }
 
-  .foot { text-align: center; color: #5B6572; font-size: 12px; margin-top: 32px; }
+  .foot { text-align: center; color: var(--ink-muted); font-size: var(--text-small); margin-top: var(--space-4); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .timeline-row, .misc-row-item { transition: none; }
+  }
+
+  @media print {
+    body { background: var(--surface-page); }
+    .hero { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    #cg-tooltip { display: none !important; }
+    .panel, .callout-next-step, .stats-strip { break-inside: avoid; }
+  }
 </style>
 </head>
 <body>
@@ -631,7 +756,7 @@ $Shell = @'
         <h1>Cybergain · Tu progreso</h1>
         <p class="subtitle">Sistema de estudio · datos de tu vault local</p>
       </div>
-      <div class="hero-date">Generado el <span class="mono">{{FECHA}}</span></div>
+      <div class="hero-date">Generado el <span class="mono">{{FECHA}}</span>{{FRESHNESS}}</div>
     </div>
   </header>
   {{BODY}}
@@ -640,39 +765,49 @@ $Shell = @'
   (function () {
     var tip = document.getElementById('cg-tooltip');
 
-    function place(e) {
+    function placeAtMouse(e) {
       tip.style.left = (e.clientX + 14) + 'px';
       tip.style.top = (e.clientY + 14) + 'px';
     }
 
-    function show(e, text) {
+    function placeAtElement(el) {
+      var rect = el.getBoundingClientRect();
+      tip.style.left = (rect.left + rect.width / 2 + 14) + 'px';
+      tip.style.top = (rect.top - 8) + 'px';
+    }
+
+    function show(text) {
       tip.textContent = text;
       tip.style.display = 'block';
-      place(e);
     }
 
     function hide() {
       tip.style.display = 'none';
     }
 
-    document.querySelectorAll('[data-tip-domain]').forEach(function (el) {
+    function wire(selector, textFn) {
+      document.querySelectorAll(selector).forEach(function (el) {
+        var text = textFn(el);
+        el.addEventListener('mouseenter', function (e) { show(text); placeAtMouse(e); });
+        el.addEventListener('mousemove', placeAtMouse);
+        el.addEventListener('mouseleave', hide);
+        el.addEventListener('focus', function () { show(text); placeAtElement(el); });
+        el.addEventListener('blur', hide);
+      });
+    }
+
+    wire('[data-tip-domain]', function (el) {
       var label = el.getAttribute('data-label');
       var value = parseInt(el.getAttribute('data-value'), 10);
       var word = value === 1 ? 'tema' : 'temas';
-      var text = label + ': ' + value + ' ' + word;
-      el.addEventListener('mouseenter', function (e) { show(e, text); });
-      el.addEventListener('mousemove', place);
-      el.addEventListener('mouseleave', hide);
+      return label + ': ' + value + ' ' + word;
     });
 
-    document.querySelectorAll('[data-tip-activity]').forEach(function (el) {
+    wire('[data-tip-activity]', function (el) {
       var date = el.getAttribute('data-date');
       var index = el.getAttribute('data-index');
       var topic = el.getAttribute('data-topic');
-      var text = date + ' · sesion ' + index + ' · ' + topic;
-      el.addEventListener('mouseenter', function (e) { show(e, text); });
-      el.addEventListener('mousemove', place);
-      el.addEventListener('mouseleave', hide);
+      return date + ' · sesion ' + index + ' · ' + topic;
     });
   })();
   </script>
@@ -699,6 +834,10 @@ if ($EsVacio) {
     <div class="stat-item"><div class="stat-label">Sesiones registradas</div><div class="stat-value">$Sesiones</div></div>
     <div class="stat-item"><div class="stat-label">Conceptos a repasar</div><div class="stat-value">$ConceptosAbiertos</div></div>
     <div class="stat-item"><div class="stat-label">Última actualización</div><div class="stat-value mono">$Ultima</div></div>
+  </section>
+
+  <section class="callout-next-step">
+    $NextStepHtml
   </section>
 
   <main class="grid">
@@ -736,6 +875,7 @@ if ($EsVacio) {
 $FechaGenerado = Get-Date -Format "yyyy-MM-dd"
 
 $Html = $Shell.Replace('{{FECHA}}', $FechaGenerado)
+$Html = $Html.Replace('{{FRESHNESS}}', $FreshnessHtml)
 $Html = $Html.Replace('{{BODY}}', $Body)
 
 $HtmlPath = Join-Path $RepoRoot "student-local\dashboard.html"
