@@ -293,7 +293,14 @@ Resume mis notas de C:\cybergain-study-os\student-local\vault\00_inbox\raw-notes
 ---
 
 ## Paso 10 — Actualizar el estado al terminar
-Al cerrar una sesión, actualiza como mínimo estos archivos:
+Al cerrar cada sesión no hace falta editar los ficheros de estado a mano: deja que Hermes lo haga por ti.
+
+```powershell
+cd C:\cybergain-study-os
+powershell -ExecutionPolicy Bypass -File .\scripts\close-session.ps1
+```
+
+El script imprime un prompt de cierre. Pega ese prompt **en la misma conversación de Hermes donde has estudiado** (necesita el contexto de la sesión de hoy). Hermes actualiza estos 4 ficheros de estado por ti:
 
 Estado general de estudio:
 ```text
@@ -315,10 +322,9 @@ Errores conceptuales o ideas mal entendidas:
 C:\cybergain-study-os\student-local\vault\99_state\MISCONCEPTIONS.md
 ```
 
-Qué deberías dejar apuntado:
-- qué has entendido
-- qué no has entendido todavía
-- qué toca en la próxima sesión
+> Revisa lo que Hermes escriba. La memoria del vault es tu fuente de verdad: si algo quedó mal, corrígelo a mano.
+
+Si prefieres, puedes seguir actualizando esos 4 ficheros a mano; el script solo te ahorra el trabajo.
 
 ---
 

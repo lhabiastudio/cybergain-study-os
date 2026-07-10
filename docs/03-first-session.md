@@ -63,7 +63,9 @@ Resume estas notas de C:\cybergain-study-os\student-local\vault\00_inbox\raw-not
 - cambios en tus archivos de estado
 
 ## Cierre recomendado
-Al terminar, actualiza como mínimo:
+Forma recomendada: ejecuta `scripts\close-session.ps1` y pega el prompt que genera en esta misma sesión de Hermes; actualiza estos ficheros por ti automáticamente.
+
+A mano, esto es lo que se actualiza como mínimo:
 - `C:\cybergain-study-os\student-local\vault\99_state\STUDY_STATE.md`
 - `C:\cybergain-study-os\student-local\vault\99_state\SESSION_BRIEF.md`
 - `C:\cybergain-study-os\student-local\vault\99_state\LEARN_LOG.md`
