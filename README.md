@@ -30,7 +30,7 @@ No incluye:
 4. Ejecuta `setup.bat`.
 5. Mete tus PDFs, audios y notas en `student-local\vault\00_inbox`.
 6. Ejecuta `scripts\start-study.ps1`.
-7. Abre Hermes con `hermes chat`.
+7. Abre Hermes con `hermes chat` y pega `profiles\student\ACTIVATION_PROMPT.md`.
 8. Estudia con un objetivo concreto.
 9. Actualiza `STUDY_STATE.md` y `SESSION_BRIEF.md`.
 10. Cierra la sesión con `scripts\close-session.ps1` para que Hermes actualice el estado del vault.

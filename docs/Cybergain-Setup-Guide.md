@@ -231,13 +231,15 @@ hermes skills
 ---
 
 ## Paso 7 — Cargar la disciplina del tutor
-El comportamiento base del tutor está aquí:
+La forma de arrancar la sesión con la disciplina del tutor cargada es abrir Hermes con `hermes chat` y pegar el contenido de este fichero:
 
 ```text
-C:\cybergain-study-os\profiles\student\STUDY_TUTOR_PROMPT.md
+C:\cybergain-study-os\profiles\student\ACTIVATION_PROMPT.md
 ```
 
-Ábrelo y úsalo como base de instrucciones fijas del tutor, o pégalo al iniciar la sesión.
+Hermes te saludará y te explicará en pocas frases cómo vais a trabajar juntos.
+
+> Si en algún momento tienes dudas de cómo funciona esto, abre `profiles\student\COMO_TRABAJAMOS.md`: es la explicación de Hermes de cómo trabajaréis juntos.
 
 La lógica del sistema es esta:
 - primero pensar
@@ -255,7 +257,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\start-study.ps1
 ```
 
 Ese script te recuerda tres rutas clave:
-- `profiles\student\STUDY_TUTOR_PROMPT.md`
+- `profiles\student\ACTIVATION_PROMPT.md`
 - `student-local\vault\99_state\SESSION_BRIEF.md`
 - `student-local\vault\99_state\STUDY_STATE.md`
 
@@ -265,11 +267,7 @@ Después abre Hermes de forma interactiva con:
 hermes chat
 ```
 
-Pega este arranque base:
-
-```text
-Quiero una sesión socrática. Usa el SESSION_BRIEF y el STUDY_STATE como contexto operativo. Objetivo de hoy: entender bien <tema>. No me des la respuesta demasiado pronto. Primero hazme pensar, luego corrige, luego resume.
-```
+Pega el contenido de `profiles\student\ACTIVATION_PROMPT.md`. Solo hace falta la primera vez de cada sesión.
 
 ---
 
@@ -395,7 +393,7 @@ Revisa que tus archivos estén exactamente en:
 - `C:\cybergain-study-os\student-local\vault\00_inbox\raw-notes`
 
 ### El tutor responde demasiado directo
-Vuelve a cargar `STUDY_TUTOR_PROMPT.md` y repite el arranque socrático.
+Vuelve a pegar `ACTIVATION_PROMPT.md` y repite el arranque socrático.
 
 ---
 
