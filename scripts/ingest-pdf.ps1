@@ -14,6 +14,5 @@ New-Item -ItemType Directory -Force -Path $DestDir | Out-Null
 Copy-Item -Path $File -Destination $DestDir -Force
 
 Write-Host "Archivo colocado en el inbox del vault."
-Write-Host "Para procesarlo, abre Hermes y pídele que lo lea, por ejemplo:"
-Write-Host '  hermes chat -q "Lee el PDF en <ruta> y hazme un resumen socratico con lagunas"'
-Write-Host "Si tienes una skill de OCR instalada, mírala con: hermes skills"
+Write-Host "Opcional: no hace falta que hagas nada más. Si no quieres esperar a tu próxima sesión, abre Hermes en esta carpeta y dile: tengo material nuevo."
+Write-Host "Él escanea el inbox solo y lo procesa. Si tienes una skill de OCR instalada, mírala con: hermes skills"

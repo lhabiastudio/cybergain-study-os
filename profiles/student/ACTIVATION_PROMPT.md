@@ -1,6 +1,8 @@
 # Prompt de activación de Hermes
 
-Abre Hermes en la carpeta del proyecto (`hermes chat`) y pega TODO lo que hay debajo de la línea. Solo hace falta la primera vez de cada sesión.
+> Ya no necesitas pegar esto: Hermes carga su rol de tutor solo al abrirse en la carpeta del proyecto, a partir de `AGENTS.md`. Se conserva aquí solo como referencia o respaldo (por ejemplo, si algún día quieres reforzar la disciplina en otra herramienta que no lea `AGENTS.md`).
+
+Si aun así quisieras usarlo a mano: abre Hermes en la carpeta del proyecto (`hermes chat`) y pega TODO lo que hay debajo de la línea.
 
 ---
 

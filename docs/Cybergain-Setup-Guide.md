@@ -4,7 +4,7 @@
 Cybergain Study OS es un sistema de estudio local para una alumna de bootcamp de ciberseguridad en Windows.
 
 Su idea es simple:
-- Hermes hace de tutor socrático
+- Hermes hace de tutor socrático y carga ese rol solo, sin que tengas que pegar ningún prompt
 - tus archivos mandan más que la memoria del modelo
 - el vault local guarda el estado real de tu estudio
 - los scripts solo quitan fricción operativa
@@ -134,6 +134,7 @@ Qué deja preparado este paso:
 - `student-local\vault\00_inbox\raw-audio`
 - `student-local\vault\00_inbox\raw-notes`
 - `student-local\vault\99_state`
+- las skills del tutor instaladas en Hermes (copiadas a `~/.hermes/skills/cybergain/`), listas para que las use sola sin que tengas que hacer nada más
 
 Puedes relanzar la comprobación cuando quieras:
 
@@ -154,7 +155,7 @@ C:\cybergain-study-os
 
 Perfil del tutor:
 ```text
-C:\cybergain-study-os\profiles\student\STUDY_TUTOR_PROMPT.md
+C:\cybergain-study-os\AGENTS.md
 ```
 
 Vault local:
@@ -195,7 +196,7 @@ C:\cybergain-study-os\student-local\exports
 ---
 
 ## Paso 6 — Meter tu material real de estudio
-Copia tus archivos aquí:
+No hace falta que le des ninguna ruta a Hermes ni que la escribas en ningún sitio. Solo suelta el archivo en la carpeta que le corresponda:
 
 PDFs del bootcamp:
 ```text
@@ -212,93 +213,44 @@ Notas personales o material suelto:
 C:\cybergain-study-os\student-local\vault\00_inbox\raw-notes
 ```
 
-No metas los archivos dentro del prompt. Mételos en estas carpetas.
-
-Importante: los scripts de ingesta solo depositan el fichero en el inbox. No hacen OCR ni transcripción automática por sí solos.
-
-Si quieres que Hermes procese luego un archivo, pídeselo tú con la ruta exacta. Ejemplo:
-
-```powershell
-hermes chat -q "Lee el PDF en C:\cybergain-study-os\student-local\vault\00_inbox\raw-pdf\tema-1.pdf y hazme un resumen claro en español"
-```
-
-Si tienes una skill instalada para OCR o transcripción, mírala con:
-
-```powershell
-hermes skills
-```
-
----
-
-## Paso 7 — Cargar la disciplina del tutor
-La forma de arrancar la sesión con la disciplina del tutor cargada es abrir Hermes con `hermes chat` y pegar el contenido de este fichero:
+Después, dentro de Hermes, dile simplemente:
 
 ```text
-C:\cybergain-study-os\profiles\student\ACTIVATION_PROMPT.md
+Tengo material nuevo.
 ```
 
-Hermes te saludará y te explicará en pocas frases cómo vais a trabajar juntos.
-
-> Si en algún momento tienes dudas de cómo funciona esto, abre `profiles\student\COMO_TRABAJAMOS.md`: es la explicación de Hermes de cómo trabajaréis juntos.
-
-La lógica del sistema es esta:
-- primero pensar
-- luego corregir
-- luego resumir
+Hermes escanea esas tres carpetas él solo, lee lo que encuentra, lo resume y lo archiva en tu vault. No copies rutas ni pegues ficheros en el chat: solo suéltalos en la carpeta y avísale.
 
 ---
 
-## Paso 8 — Preparar y abrir la primera sesión
-Primero ejecuta el script de arranque:
+## Paso 7 — Abrir tu tutor y estudiar
+Abre Hermes dentro de la carpeta del proyecto:
 
 ```powershell
 cd C:\cybergain-study-os
-powershell -ExecutionPolicy Bypass -File .\scripts\start-study.ps1
-```
-
-Ese script te recuerda tres rutas clave:
-- `profiles\student\ACTIVATION_PROMPT.md`
-- `student-local\vault\99_state\SESSION_BRIEF.md`
-- `student-local\vault\99_state\STUDY_STATE.md`
-
-Después abre Hermes de forma interactiva con:
-
-```powershell
 hermes chat
 ```
 
-Pega el contenido de `profiles\student\ACTIVATION_PROMPT.md`. Solo hace falta la primera vez de cada sesión.
+No hace falta pegar ningún prompt. Hermes lee `AGENTS.md` al arrancar en esta carpeta y ya sabe que es tu tutor: revisa por dónde vas, te saluda, te recuerda cómo trabajáis juntos y te pregunta cuál es tu objetivo de hoy.
+
+Dentro de la sesión:
+1. Confirma o cambia el objetivo que te propone.
+2. Pídele directamente el tema que quieras trabajar; él busca primero en tu vault antes que en su memoria general.
+3. Deja que te haga pensar antes de darte la respuesta completa.
+4. Si has soltado material nuevo en el inbox, dile "tengo material nuevo" y lo procesa él (ver Paso 6).
+
+> Si tienes dudas de cómo funciona esto por dentro, `profiles\student\COMO_TRABAJAMOS.md` explica la disciplina que sigue Hermes contigo.
 
 ---
 
-## Paso 9 — Flujo recomendado dentro de cada sesión
-Usa este patrón:
-1. Define un único objetivo.
-2. Señala qué archivo o material quieres trabajar.
-3. Obliga al tutor a hacerte pensar antes de responder.
-4. Cierra con resumen, lagunas y siguiente paso.
-
-Ejemplos de peticiones útiles dentro de Hermes:
+## Paso 8 — Cerrar la sesión
+No hace falta que edites nada a mano. Al terminar, dile a Hermes:
 
 ```text
-Lee el PDF en C:\cybergain-study-os\student-local\vault\00_inbox\raw-pdf\redes-tema-2.pdf y hazme preguntas antes de explicármelo.
+Cerramos.
 ```
 
-```text
-Resume mis notas de C:\cybergain-study-os\student-local\vault\00_inbox\raw-notes\repaso-firewall.txt y sácame 10 flashcards.
-```
-
----
-
-## Paso 10 — Actualizar el estado al terminar
-Al cerrar cada sesión no hace falta editar los ficheros de estado a mano: deja que Hermes lo haga por ti.
-
-```powershell
-cd C:\cybergain-study-os
-powershell -ExecutionPolicy Bypass -File .\scripts\close-session.ps1
-```
-
-El script imprime un prompt de cierre. Pega ese prompt **en la misma conversación de Hermes donde has estudiado** (necesita el contexto de la sesión de hoy). Hermes actualiza estos 4 ficheros de estado por ti:
+Hermes te resume qué has entendido, qué sigue flojo, qué conviene repasar y te deja un mini ejercicio de comprobación. Después actualiza él mismo estos ficheros de estado:
 
 Estado general de estudio:
 ```text
@@ -322,11 +274,9 @@ C:\cybergain-study-os\student-local\vault\99_state\MISCONCEPTIONS.md
 
 > Revisa lo que Hermes escriba. La memoria del vault es tu fuente de verdad: si algo quedó mal, corrígelo a mano.
 
-Si prefieres, puedes seguir actualizando esos 4 ficheros a mano; el script solo te ahorra el trabajo.
-
 ---
 
-## Paso 11 — Ver tu dashboard de progreso
+## Paso 9 — Ver tu dashboard de progreso
 Cuando quieras ver de un vistazo tu progreso, los apuntes que ha dejado Hermes para la próxima sesión y los errores conceptuales que tienes que repasar, ejecuta:
 
 ```powershell
@@ -336,11 +286,13 @@ powershell -ExecutionPolicy Bypass -File .\scripts\dashboard.ps1
 
 Esto genera una página y la abre en tu navegador. Se construye a partir de tu vault local: no sube nada a internet.
 
+También puedes pedírselo directamente a Hermes dentro del chat: "¿por dónde voy?" te da el mismo resumen en texto, sin abrir nada.
+
 > El dashboard es una foto de tu vault en este momento. Vuelve a ejecutarlo cuando quieras verlo actualizado.
 
 ---
 
-## Paso 12 — Generar un review pack semanal
+## Paso 10 — Generar un review pack semanal
 Cuando quieras preparar material de repaso, ejecuta:
 
 ```powershell
@@ -356,9 +308,11 @@ C:\cybergain-study-os\student-local\outputs
 
 Ahí tendrás un pack base para repasar y seguir trabajando con Hermes.
 
+También puedes pedirle un repaso directamente dentro del chat, por ejemplo "hazme un repaso de lo que llevo flojo": Hermes monta la sesión de recuerdo activo él solo, apoyándose en tus errores conceptuales abiertos.
+
 ---
 
-## Paso 13 — Proteger material de laboratorio
+## Paso 11 — Proteger material de laboratorio
 > Si vas a guardar payloads, binarios o muestras de laboratorio, Windows Defender puede borrarlos o ponerlos en cuarentena. Añade una exclusión para `C:\cybergain-study-os\student-local` antes de pensar que el sistema ha perdido tus archivos.
 
 ---
@@ -387,13 +341,15 @@ powershell -ExecutionPolicy Bypass -File .\scripts\check-system.ps1
 ```
 
 ### El sistema no encuentra material
-Revisa que tus archivos estén exactamente en:
+Revisa que tus archivos estén exactamente en la carpeta `raw-*` que toque:
 - `C:\cybergain-study-os\student-local\vault\00_inbox\raw-pdf`
 - `C:\cybergain-study-os\student-local\vault\00_inbox\raw-audio`
 - `C:\cybergain-study-os\student-local\vault\00_inbox\raw-notes`
 
+Si están ahí y Hermes no los menciona, dile dentro del chat "tengo material nuevo" para que vuelva a escanear el inbox.
+
 ### El tutor responde demasiado directo
-Vuelve a pegar `ACTIVATION_PROMPT.md` y repite el arranque socrático.
+Recuérdaselo dentro de la misma conversación: "quiero que me hagas pensar antes de darme la respuesta". No hace falta reactivar nada ni pegar ningún prompt: es su forma de trabajar por defecto, marcada en `AGENTS.md`.
 
 ---
 
@@ -402,11 +358,10 @@ Vuelve a pegar `ACTIVATION_PROMPT.md` y repite el arranque socrático.
 2. Instalar Hermes.
 3. Hacer login en Codex con `hermes model`.
 4. Clonar el repo en `C:\cybergain-study-os`.
-5. Ejecutar `setup.bat`.
-6. Meter material en `student-local\vault\00_inbox`.
-7. Ejecutar `start-study.ps1`.
-8. Abrir Hermes con `hermes chat`.
-9. Estudiar con disciplina socrática.
-10. Actualizar `99_state`.
-11. Ver el progreso con `dashboard.ps1`.
-12. Generar review packs cuando toque.
+5. Ejecutar `setup.bat` una vez: crea tu vault local e instala las skills del tutor.
+6. Soltar material nuevo en `student-local\vault\00_inbox\raw-*` cuando lo tengas.
+7. Abrir Hermes con `hermes chat` dentro de la carpeta del proyecto: te saluda y te guía él solo.
+8. Estudiar con disciplina socrática.
+9. Al terminar, decirle "cerramos": Hermes actualiza tu estado por ti.
+10. Ver el progreso con `dashboard.ps1` o preguntándoselo directamente a Hermes.
+11. Generar review packs cuando toque.

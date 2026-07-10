@@ -54,17 +54,19 @@ Comprueba que están exactamente aquí:
 - `C:\cybergain-study-os\student-local\vault\00_inbox\raw-audio`
 - `C:\cybergain-study-os\student-local\vault\00_inbox\raw-notes`
 
-Si usaste `ingest-pdf.ps1` o `ingest-audio.ps1`, recuerda esto: esos scripts solo copian el archivo al inbox. El análisis lo tienes que pedir tú a Hermes después.
+Si usaste `ingest-pdf.ps1` o `ingest-audio.ps1`, o si copiaste el archivo a mano, recuerda esto: el fichero solo queda depositado en el inbox, nadie lo procesa por sí solo hasta que se lo dices a Hermes.
 
-Ejemplo:
+Dentro del chat, dile simplemente:
 
-```powershell
-hermes chat -q "Lee el PDF en C:\cybergain-study-os\student-local\vault\00_inbox\raw-pdf\tema-1.pdf y hazme un resumen claro"
+```text
+Tengo material nuevo.
 ```
 
+Hermes escanea las tres carpetas del inbox él solo y lo procesa. No hace falta que le des ninguna ruta.
+
 ## El tutor responde demasiado directo
-- vuelve a abrir `profiles\student\STUDY_TUTOR_PROMPT.md`
-- vuelve a pedir una sesión socrática
+- recuérdaselo dentro de la misma conversación: "quiero que me hagas pensar antes de darme la respuesta"
+- no hace falta reactivar nada ni pegar ningún prompt: su forma de trabajar por defecto está marcada en `AGENTS.md`
 - usa el flujo recomendado en `03-first-session.md`
 - registra el fallo en `MISCONCEPTIONS.md` si te ayuda
 

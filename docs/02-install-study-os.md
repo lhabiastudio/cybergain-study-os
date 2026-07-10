@@ -39,6 +39,7 @@ Resultado esperado:
 - se crea `student-local\vault`
 - se copia la plantilla inicial del vault
 - se crean las carpetas de entradas, outputs y exports
+- se instalan las skills del tutor en Hermes (`~/.hermes/skills/cybergain/`), listas para usarse solas sin configuración adicional
 
 ## Paso 3 — Revisar el estado inicial
 Ejecuta:
@@ -69,26 +70,24 @@ Copia o mueve tus archivos a estas carpetas:
 - audios o clases grabadas → `C:\cybergain-study-os\student-local\vault\00_inbox\raw-audio`
 - notas personales → `C:\cybergain-study-os\student-local\vault\00_inbox\raw-notes`
 
-Importante: los scripts de ingesta solo copian el fichero al inbox. No hacen OCR ni transcripción por sí solos.
+No hace falta que teclees ninguna ruta ni que hagas nada más: la próxima vez que abras Hermes en esta carpeta, o si le dices "tengo material nuevo", él escanea el inbox solo, lo lee y lo archiva en tu vault.
 
-Si quieres procesar luego un archivo con Hermes, pídeselo tú de forma explícita. Ejemplo:
+## Paso 6 — Abrir la primera sesión
+Abre Hermes directamente dentro de la carpeta del proyecto:
 
 ```powershell
-hermes chat -q "Lee el PDF en C:\cybergain-study-os\student-local\vault\00_inbox\raw-pdf\tema-1.pdf y hazme un resumen claro en español"
+cd C:\cybergain-study-os
+hermes chat
 ```
 
-## Paso 6 — Preparar la primera sesión
-Ejecuta:
+Resultado esperado: Hermes carga su rol de tutor solo (a partir de `AGENTS.md`), te saluda y te pregunta cuál es tu objetivo de hoy. No hace falta pegar ningún prompt.
+
+Si quieres ver un recordatorio en texto de las rutas de estado antes de entrar, puedes ejecutar opcionalmente:
 
 ```powershell
 cd C:\cybergain-study-os
 powershell -ExecutionPolicy Bypass -File .\scripts\start-study.ps1
 ```
-
-Resultado esperado: la terminal te recuerda tres rutas clave:
-- `profiles\student\STUDY_TUTOR_PROMPT.md`
-- `student-local\vault\99_state\SESSION_BRIEF.md`
-- `student-local\vault\99_state\STUDY_STATE.md`
 
 ## Paso 7 — Proteger material de laboratorio
 > Si guardas payloads, binarios o muestras de laboratorio, Windows Defender puede borrarlos o ponerlos en cuarentena. Añade una exclusión para `C:\cybergain-study-os\student-local` antes de pensar que Hermes o el repo han perdido tus archivos.
