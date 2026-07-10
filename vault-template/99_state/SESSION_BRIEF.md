@@ -1,16 +1,13 @@
-# SESSION_BRIEF
+# Brief de la próxima sesión
 
-Objective of this session:
-- TBD
+objetivo: TBD
+material_a_anclar: TBD
 
-Material to anchor on:
-- TBD
+## El tutor debe evitar
+- dar la respuesta completa demasiado pronto
+- alejarse del objetivo de la sesión
 
-What the tutor must avoid:
-- giving the full answer too early
-- drifting away from the current objective
-
-Desired output:
-- explanation
-- comprehension check
-- next step
+## Salida deseada
+- explicación
+- chequeo de comprensión
+- siguiente paso

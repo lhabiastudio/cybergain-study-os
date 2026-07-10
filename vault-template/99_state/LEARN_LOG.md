@@ -1,6 +1,6 @@
-# LEARN_LOG
+# Bitácora de aprendizaje
 
-Append-only log.
+Registro append-only. Una línea por sesión, formato de la plantilla.
 
-## Template
-- DATE — topic — what became clearer — what stayed weak — next action
+## Plantilla
+- YYYY-MM-DD — tema — qué quedó más claro — qué sigue flojo — siguiente acción

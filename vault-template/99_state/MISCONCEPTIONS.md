@@ -1,9 +1,10 @@
-# MISCONCEPTIONS
+# Errores conceptuales
 
-Track recurring wrong mental models.
+Modelos mentales equivocados a corregir. Un bloque por concepto.
 
-## Template
-- Concept:
-- Wrong assumption:
-- Correct model:
-- Example:
+## Plantilla
+- Concepto:
+- Suposición equivocada:
+- Modelo correcto:
+- Ejemplo:
+- Estado: abierto

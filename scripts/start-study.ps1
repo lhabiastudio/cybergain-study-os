@@ -1,4 +1,4 @@
-$ErrorActionPreference = "Stop"
+﻿$ErrorActionPreference = "Stop"
 
 $RepoRoot = Split-Path -Parent $PSScriptRoot
 $Brief = Join-Path $RepoRoot "student-local\vault\99_state\SESSION_BRIEF.md"

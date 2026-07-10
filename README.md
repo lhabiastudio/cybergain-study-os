@@ -34,7 +34,8 @@ No incluye:
 8. Estudia con un objetivo concreto.
 9. Actualiza `STUDY_STATE.md` y `SESSION_BRIEF.md`.
 10. Cierra la sesión con `scripts\close-session.ps1` para que Hermes actualice el estado del vault.
-11. Genera packs de repaso con `scripts\generate-review-pack.ps1`.
+11. Ve tu progreso con `scripts\dashboard.ps1`.
+12. Genera packs de repaso con `scripts\generate-review-pack.ps1`.
 
 ## Prerrequisitos reales
 - Git

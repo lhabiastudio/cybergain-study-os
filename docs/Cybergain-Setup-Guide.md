@@ -328,7 +328,21 @@ Si prefieres, puedes seguir actualizando esos 4 ficheros a mano; el script solo 
 
 ---
 
-## Paso 11 — Generar un review pack semanal
+## Paso 11 — Ver tu dashboard de progreso
+Cuando quieras ver de un vistazo tu progreso, los apuntes que ha dejado Hermes para la próxima sesión y los errores conceptuales que tienes que repasar, ejecuta:
+
+```powershell
+cd C:\cybergain-study-os
+powershell -ExecutionPolicy Bypass -File .\scripts\dashboard.ps1
+```
+
+Esto genera una página y la abre en tu navegador. Se construye a partir de tu vault local: no sube nada a internet.
+
+> El dashboard es una foto de tu vault en este momento. Vuelve a ejecutarlo cuando quieras verlo actualizado.
+
+---
+
+## Paso 12 — Generar un review pack semanal
 Cuando quieras preparar material de repaso, ejecuta:
 
 ```powershell
@@ -346,7 +360,7 @@ Ahí tendrás un pack base para repasar y seguir trabajando con Hermes.
 
 ---
 
-## Paso 12 — Proteger material de laboratorio
+## Paso 13 — Proteger material de laboratorio
 > Si vas a guardar payloads, binarios o muestras de laboratorio, Windows Defender puede borrarlos o ponerlos en cuarentena. Añade una exclusión para `C:\cybergain-study-os\student-local` antes de pensar que el sistema ha perdido tus archivos.
 
 ---
@@ -396,4 +410,5 @@ Vuelve a cargar `STUDY_TUTOR_PROMPT.md` y repite el arranque socrático.
 8. Abrir Hermes con `hermes chat`.
 9. Estudiar con disciplina socrática.
 10. Actualizar `99_state`.
-11. Generar review packs cuando toque.
+11. Ver el progreso con `dashboard.ps1`.
+12. Generar review packs cuando toque.

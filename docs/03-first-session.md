@@ -78,3 +78,5 @@ Cuando ya tengas varias sesiones, genera un pack de repaso así:
 cd C:\cybergain-study-os
 powershell -ExecutionPolicy Bypass -File .\scripts\generate-review-pack.ps1
 ```
+
+Para ver tu progreso y los apuntes de Hermes, ejecuta `scripts\dashboard.ps1` cuando quieras.

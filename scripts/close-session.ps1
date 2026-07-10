@@ -28,7 +28,7 @@ Edita directamente estos 4 ficheros (rutas exactas de este equipo):
 4. $Misconceptions
    Anade o corrige errores conceptuales detectados hoy. Marca como resueltos los que ya he entendido.
 
-Reglas: escribe austero y concreto. Si un fichero no necesita cambios, dilo y no lo toques. Al terminar, resumeme en 3 lineas que actualizaste.
+Reglas: escribe austero y concreto. Si un fichero no necesita cambios, dilo y no lo toques. Manten la estructura de campos de cada fichero (lineas 'clave: valor' y los encabezados de seccion) para que el dashboard pueda leerlos. Al terminar, resumeme en 3 lineas que actualizaste.
 "@
 
 Set-Content -Encoding UTF8 $PromptFile $prompt
@@ -45,3 +45,6 @@ Write-Host $prompt
 Write-Host "----- fin del prompt -----"
 Write-Host ""
 Write-Host "Hermes actualizara los 4 ficheros de estado por ti. Revisa que lo que escribio es correcto."
+Write-Host ""
+Write-Host "Cuando Hermes termine de actualizar, mira tu progreso con:"
+Write-Host "  powershell -ExecutionPolicy Bypass -File .\scripts\dashboard.ps1"

@@ -1,22 +1,22 @@
-# STUDY_STATE
+# Estado de estudio
 
-status: active
-current_module: TBD
-current_goal: TBD
-next_session_goal: TBD
-last_updated: TBD
+estado: activo
+modulo_actual: TBD
+objetivo_actual: TBD
+objetivo_siguiente: TBD
+ultima_actualizacion: TBD
 
-## Topics in progress
+## En progreso
 - TBD
 
-## Blockers
+## Dominado
 - TBD
 
-## Understood
+## A medias
 - TBD
 
-## Partially understood
+## Pendiente
 - TBD
 
-## Not yet understood
+## Bloqueos
 - TBD
