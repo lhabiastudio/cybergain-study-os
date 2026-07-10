@@ -239,6 +239,8 @@ Dentro de la sesión:
 3. Deja que te haga pensar antes de darte la respuesta completa.
 4. Si has soltado material nuevo en el inbox, dile "tengo material nuevo" y lo procesa él (ver Paso 6).
 
+Cuando ya lleves varios temas metidos, también puedes pedirle que te enseñe cómo se relacionan entre sí: "conecta los conceptos que llevo". Hermes revisa tu material, te dice qué se apoya en qué y te ordena el repaso por dependencia en vez de por orden de llegada.
+
 > Si tienes dudas de cómo funciona esto por dentro, `profiles\student\COMO_TRABAJAMOS.md` explica la disciplina que sigue Hermes contigo.
 
 ---

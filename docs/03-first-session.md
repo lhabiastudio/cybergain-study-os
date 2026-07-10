@@ -57,6 +57,15 @@ Cerramos.
 - `C:\cybergain-study-os\student-local\vault\99_state\LEARN_LOG.md`
 - `C:\cybergain-study-os\student-local\vault\99_state\MISCONCEPTIONS.md` si aplica
 
+## Conectar lo que llevas estudiado
+Cuando ya tengas varios temas metidos, puedes pedirle a Hermes que te enseñe cómo encajan entre sí:
+
+```text
+Conecta los conceptos que llevo.
+```
+
+También vale "hazme el mapa de lo que he estudiado" o "no veo cómo encaja esto con lo de antes". Hermes revisa tu material, te dice qué se apoya en qué y por dónde te conviene empezar a repasar. No te da un grafo bonito: te ordena el repaso.
+
 ## Review pack
 Cuando ya tengas varias sesiones, genera un pack de repaso así:
 

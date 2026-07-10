@@ -4,7 +4,7 @@ Sistema de estudio local para una alumna de bootcamp de ciberseguridad en Window
 
 ## Qué trae este repo
 - `AGENTS.md` — rol del tutor, que Hermes carga solo al abrirse en esta carpeta
-- `hermes-skills/` — skills del tutor (ingerir, estudiar, cerrar sesión, progreso, repaso), instaladas por `setup.bat`
+- `hermes-skills/` — skills del tutor (ingerir, estudiar, cerrar sesión, progreso, repaso, conectar), instaladas por `setup.bat`
 - `vault-template/` — plantilla inicial del vault
 - `profiles/student/` — material de referencia del tutor
 - `scripts/` — scripts PowerShell para setup y uso diario
